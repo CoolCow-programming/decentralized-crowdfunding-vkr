@@ -1,22 +1,18 @@
-# 👋 Привет, новый разработчик!
+# Быстрый вход в проект
 
-Это документ для быстрого входа в проект **Crowdfunding Escrow на Solana**.
+Это внутренний документ для быстрого понимания структуры и потока `crowdfunding-escrow`.
 
----
+## Что это за проект?
 
-## 🎯 Что это за проект?
-
-Краудфандинговая платформа на блокчейне Solana. Пользователи создают кампании, другие делают взносы (pledge). Если цель достигнута — создатель получает деньги. Если нет — взносы возвращаются.
+Это демонстрационный escrow-механизм для децентрализованного краудфандинга на Solana. Пользователи создают кампании, спонсоры вносят средства в vault, а затем программа определяет один из сценариев: `claim`, `refund`, milestone release или dispute resolution.
 
 **Стек:**
 - **Smart Contract**: Rust + Anchor (Solana)
 - **Frontend**: React + TypeScript + Vite
 - **Wallet**: Phantom/Solflare (Solana Wallet Adapter)
-- **Network**: Devnet (тестовая сеть)
+- **Network**: Localnet по умолчанию, Devnet как дополнительный режим
 
----
-
-## 📁 Структура проекта (что где)
+## Структура проекта
 
 ```
 crowdfunding-escrow/
@@ -28,7 +24,8 @@ crowdfunding-escrow/
 │                              • Создание кампании
 │                              • Взносы (pledge)
 │                              • Возврат средств
-│                              • Получение денег создателем
+│                              • Settlement, claim и refund
+│                              • Milestones и disputes
 │
 ├── 📂 app/src/             ⭐ FRONTEND (React)
 │   │
@@ -39,7 +36,7 @@ crowdfunding-escrow/
 │   ├── pages/              • Страницы:
 │   │   ├── HomePage.tsx           └─ Главная (список кампаний)
 │   │   ├── CreateCampaignPage.tsx └─ Создание кампании
-│   │   └── CampaignDetailsPage.tsx └─ Детали + pledge/claim
+│   │   └── CampaignDetailsPage.tsx └─ Детали + pledge/settlement/milestones
 │   │
 │   ├── components/         • Переиспользуемые компоненты:
 │   │   └── CampaignCard.tsx       └─ Карточка кампании
@@ -48,7 +45,7 @@ crowdfunding-escrow/
 │   │   └── useCampaignProgram.ts  └─ Логика взаимодействия с контрактом
 │   │
 │   └── utils/              • Утилиты:
-│       └── constants.ts           └─ Program ID, размеры, форматирование
+│       └── constants.ts           └─ Program ID, статусы, форматирование
 │
 ├── 📂 tests/
 │   └── crowdfunding-escrow.ts  ⭐ ТЕСТЫ КОНТРАКТА
@@ -59,53 +56,50 @@ crowdfunding-escrow/
 └── 📄 README_RU.md         • Полная документация
 ```
 
----
-
-## 🚀 Быстрый старт
+## Быстрый старт
 
 ### 1. Установка зависимостей
 
 ```bash
-# Frontend
+cd crowdfunding-escrow
+yarn install
 cd app && yarn install
 
-# Проверка Rust (должно быть установлено)
+# Проверка toolchain
 rustc --version      # >= 1.70
 cargo --version
-
-# Проверка Solana
 solana --version     # >= 1.16
 anchor --version     # >= 0.30
 ```
 
-### 2. Запуск frontend (для разработки)
+### 2. Полный локальный сценарий
 
 ```bash
-cd app
-yarn dev
-# Открой http://localhost:3000
+yarn start:local
 ```
 
-### 3. Сборка контракта
+Скрипт поднимет localnet, сделает airdrop, соберет и задеплоит программу, инициализирует `config` и запустит frontend.
+
+### 3. Ручной сценарий
 
 ```bash
+solana config set --url localhost
+solana-test-validator --reset
+solana airdrop 100 --url localhost
 anchor build
-# Артефакты появятся в target/deploy/ и target/idl/
+anchor deploy --provider.cluster localnet
+yarn init:localnet-config
+cd app
+yarn dev
 ```
 
 ### 4. Запуск тестов
 
 ```bash
-# В одном терминале (валидатор)
-solana-test-validator --reset
-
-# В другом (тесты)
-anchor test
+yarn test:oneclick
 ```
 
----
-
-## 🔑 Ключевые концепции
+## Ключевые концепции
 
 ### PDA (Program Derived Address)
 
@@ -115,38 +109,29 @@ anchor test
 
 | PDA | Seeds | Для чего |
 |-----|-------|----------|
-| **Campaign** | `["campaign", creator, timestamp]` | Хранит данные кампании |
+| **Config** | `["config"]` | Хранит admin/arbiter/treasury/fee |
+| **Campaign** | `["campaign", creator, nonce]` | Хранит данные кампании |
 | **Vault** | `["vault", campaign_pubkey]` | Хранит SOL до завершения |
 | **Pledge** | `["pledge", backer, campaign]` | Хранит информацию о взносе |
+| **Milestone** | `["milestone", campaign, index]` | Хранит этап финансирования |
 
 ### Пример создания PDA в коде:
 
 ```typescript
 // TypeScript (frontend)
 const [campaignPDA] = PublicKey.findProgramAddressSync(
-  [Buffer.from("campaign"), creator.toBuffer(), timestamp.toBuffer("le", 8)],
+  [Buffer.from("campaign"), creator.toBuffer(), nonce.toArrayLike(Buffer, "le", 8)],
   PROGRAM_ID
 );
 ```
 
-```rust
-// Rust (контракт)
-#[account(
-    seeds = [b"campaign", creator.key().as_ref(), clock.unix_timestamp.to_le_bytes().as_ref()],
-    bump
-)]
-pub campaign: Account<'info, Campaign>,
-```
-
----
-
-## 💻 Как это работает (поток)
+## Как это работает
 
 ### Создание кампании:
 
 ```
 1. Пользователь нажимает "Создать кампанию"
-2. Frontend создаёт PDA для кампании и vault
+2. Frontend вычисляет PDA кампании и vault
 3. Отправляет транзакцию на initialize_campaign()
 4. Контракт создаёт аккаунты Campaign и Vault
 5. Кампания появляется в списке
@@ -162,19 +147,26 @@ pub campaign: Account<'info, Campaign>,
 5. Обновляет current_amount кампании
 ```
 
-### Завершение (Claim):
+### Завершение кампании:
 
 ```
-1. Срок кампании истёк + цель достигнута
-2. Создатель нажимает "Получить средства"
-3. Контракт проверяет условия
-4. Переводит SOL: vault → creator
-5. Ставит флаг is_claimed = true
+1. Цель достигнута или дедлайн наступил
+2. Кто-то вызывает settle_campaign()
+3. Контракт переводит кампанию в Successful/Failed
+4. Дальше возможен claim, refund или milestone flow
 ```
 
----
+### Milestone flow:
 
-## 🧪 Тестирование контракта
+```
+1. Создатель добавляет milestone
+2. После успеха кампании отправляет этап на голосование
+3. Спонсоры голосуют за/против
+4. Контракт финализирует этап
+5. Средства этапа релизятся или открывается dispute
+```
+
+## Тестирование контракта
 
 Файл: `tests/crowdfunding-escrow.ts`
 
@@ -203,15 +195,13 @@ describe("Pledge to Campaign", () => {
 anchor test
 ```
 
----
-
-## 🐛 Отладка
+## Отладка
 
 ### Frontend не работает?
 
 1. **Открой консоль (F12)** → смотри ошибки
 2. **Проверь подключение кошелька** → Phantom должен быть установлен
-3. **Проверь network** → Devnet в кошельке и в коде
+3. **Проверь network** → Localnet в кошельке и в коде
 
 ### Контракт не компилируется?
 
@@ -228,11 +218,10 @@ anchor build
 
 1. Проверь баланс SOL (нужен для комиссий)
 2. Проверь Program ID в `Anchor.toml` и `lib.rs`
-3. Смотри логи валидатора: `solana logs`
+3. Проверь, что выполнен `yarn init:localnet-config`
+4. Смотри логи валидатора: `solana logs --url localhost`
 
----
-
-## 📚 Полезные ссылки
+## Полезные ссылки
 
 | Ресурс | Описание |
 |--------|----------|
@@ -241,14 +230,12 @@ anchor build
 | [Solana Cookbook](https://solanacookbook.com/) | Рецепты для Solana |
 | [Wallet Adapter](https://github.com/solana-labs/wallet-adapter) | Подключение кошельков |
 
----
-
-## 🎯 С чего начать разработку?
+## С чего начать разработку?
 
 ### Хочешь изменить контракт?
 
 1. Открой `programs/crowdfunding-escrow/src/lib.rs`
-2. Найди нужную инструкцию (например, `pub fn pledge(...)`)
+2. Найди нужную инструкцию, например `pub fn pledge(...)` или `pub fn settle_campaign(...)`
 3. Внеси изменения
 4. Запусти `anchor build`
 5. Запусти `anchor test`
@@ -258,6 +245,7 @@ anchor build
 1. Открой `app/src/pages/` для страниц
 2. Открой `app/src/components/` для компонентов
 3. Запусти `yarn dev`
+4. Для on-chain интеграции смотри `app/src/hooks/useCampaignProgram.ts`
 4. Изменения применяются автоматически (HMR)
 
 ### Хочешь добавить новую функцию?
