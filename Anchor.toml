@@ -6,7 +6,10 @@ resolution = true
 skip-lint = false
 
 [programs.localnet]
-crowdfunding_escrow = "AZmmfhrAZxbiLqRtDZV7zVKwJ8wX9PMDG5wzxiCRin1r"
+crowdfunding_escrow = "FWh6EtpM5usrduc89K6YEQZ6GQ5UmycGHfM6VSrPcpUz"
+
+[programs.devnet]
+crowdfunding_escrow = "FWh6EtpM5usrduc89K6YEQZ6GQ5UmycGHfM6VSrPcpUz"
 
 [registry]
 url = "https://api.apr.dev"

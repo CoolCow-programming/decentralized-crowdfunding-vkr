@@ -1,8 +1,22 @@
 {
   "license": "ISC",
   "scripts": {
+    "solana:localnet": "solana config set --url localhost",
+    "solana:devnet": "solana config set --url devnet",
+    "validator:reset": "solana-test-validator --reset",
+    "airdrop:localnet": "solana airdrop 100 --url localhost",
+    "build:program": "anchor build",
+    "test:localnet": "anchor test --skip-local-validator",
+    "deploy:devnet": "anchor deploy --provider.cluster devnet",
+    "start:local": "bash scripts/run-local-demo.sh",
+    "start:devnet": "bash scripts/run-devnet-demo.sh",
+    "test:oneclick": "bash scripts/run-local-tests.sh",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
-    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check"
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "init:localnet-config": "node scripts/init-localnet-config.js",
+    "init:devnet-config": "SOLANA_URL=https://api.devnet.solana.com node scripts/init-localnet-config.js",
+    "app:dev": "yarn --cwd app dev",
+    "app:build": "yarn --cwd app build"
   },
   "dependencies": {
     "@coral-xyz/anchor": "^0.32.1"
