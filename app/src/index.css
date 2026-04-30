@@ -1,0 +1,303 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+  color: #ebe2d5;
+  background:
+    linear-gradient(180deg, #0b1014 0%, #131a20 55%, #0d1116 100%);
+  --app-bg: #0c1014;
+  --surface: rgba(25, 31, 37, 0.94);
+  --surface-strong: rgba(18, 23, 29, 0.98);
+  --surface-soft: rgba(34, 41, 48, 0.88);
+  --line: rgba(146, 159, 165, 0.2);
+  --line-strong: rgba(210, 140, 84, 0.34);
+  --line-soft: rgba(99, 115, 126, 0.2);
+  --ink: #ebe2d5;
+  --muted: #97a0a8;
+  --cyan: #8cb9c3;
+  --cyan-strong: #c3dde3;
+  --lime: #c5b28a;
+  --amber: #c98855;
+  --danger: #ff7b6b;
+  --dust: #b99569;
+  --shadow: 0 20px 50px rgba(0, 0, 0, 0.32);
+  --header-bg: linear-gradient(180deg, rgba(23,28,34,0.98) 0%, rgba(19,24,29,0.96) 100%);
+  --footer-bg: linear-gradient(180deg, rgba(20,24,29,0.94) 0%, rgba(16,20,24,0.96) 100%);
+  --hero-bg: linear-gradient(180deg, rgba(33,39,46,0.98) 0%, rgba(24,29,35,0.96) 100%);
+  --hero-grid: linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px);
+  --panel-bg: linear-gradient(180deg, rgba(31, 37, 44, 0.98) 0%, rgba(22, 28, 34, 0.96) 100%);
+  --panel-soft-bg: linear-gradient(180deg, rgba(39, 46, 54, 0.96) 0%, rgba(29, 35, 42, 0.94) 100%);
+  --panel-subtle-bg: rgba(255,255,255,0.02);
+  --progress-track: rgba(255,255,255,0.05);
+  --chip-bg: rgba(140, 185, 195, 0.08);
+  --warn-border: rgba(201,136,85,0.28);
+  --warn-bg: rgba(201,136,85,0.10);
+  --warn-text: #e5bb96;
+  --success-border: rgba(197,178,138,0.26);
+  --success-bg: rgba(197,178,138,0.10);
+  --success-text: #efe3c3;
+  --danger-border: rgba(211,122,114,0.3);
+  --danger-bg: rgba(211,122,114,0.10);
+  --danger-text: #f0bbb5;
+  --info-border: rgba(140,185,195,0.26);
+  --info-bg: rgba(140,185,195,0.10);
+  --info-text: #d4e5ea;
+}
+
+:root[data-theme='light'] {
+  color: #201a16;
+  background:
+    linear-gradient(180deg, #e9e1d6 0%, #dcd2c4 55%, #efe6da 100%);
+  --app-bg: #e6ddd1;
+  --surface: rgba(244, 239, 231, 0.96);
+  --surface-strong: rgba(250, 246, 240, 0.98);
+  --surface-soft: rgba(233, 225, 214, 0.92);
+  --line: rgba(120, 129, 134, 0.22);
+  --line-strong: rgba(174, 110, 64, 0.28);
+  --line-soft: rgba(140, 147, 151, 0.18);
+  --ink: #201a16;
+  --muted: #6e757b;
+  --cyan: #6f97a1;
+  --cyan-strong: #4f6f78;
+  --lime: #8f7e5b;
+  --amber: #aa6d40;
+  --danger: #c35950;
+  --dust: #b68a5d;
+  --shadow: 0 18px 45px rgba(76, 64, 52, 0.14);
+  --header-bg: linear-gradient(180deg, rgba(242,236,228,0.98) 0%, rgba(233,225,214,0.96) 100%);
+  --footer-bg: linear-gradient(180deg, rgba(238,231,221,0.96) 0%, rgba(230,221,209,0.98) 100%);
+  --hero-bg: linear-gradient(180deg, rgba(244,239,231,0.98) 0%, rgba(235,227,216,0.96) 100%);
+  --hero-grid: linear-gradient(rgba(32,26,22,0.03) 1px, transparent 1px), linear-gradient(90deg, rgba(32,26,22,0.03) 1px, transparent 1px);
+  --panel-bg: linear-gradient(180deg, rgba(247, 242, 235, 0.98) 0%, rgba(236, 228, 217, 0.96) 100%);
+  --panel-soft-bg: linear-gradient(180deg, rgba(241, 235, 226, 0.98) 0%, rgba(230, 221, 209, 0.96) 100%);
+  --panel-subtle-bg: rgba(32,26,22,0.03);
+  --progress-track: rgba(32,26,22,0.08);
+  --chip-bg: rgba(111,151,161,0.10);
+  --warn-border: rgba(170,109,64,0.22);
+  --warn-bg: rgba(170,109,64,0.10);
+  --warn-text: #8a5631;
+  --success-border: rgba(143,126,91,0.22);
+  --success-bg: rgba(143,126,91,0.10);
+  --success-text: #726443;
+  --danger-border: rgba(195,89,80,0.22);
+  --danger-bg: rgba(195,89,80,0.10);
+  --danger-text: #97473f;
+  --info-border: rgba(111,151,161,0.22);
+  --info-bg: rgba(111,151,161,0.10);
+  --info-text: #456a75;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 14% 18%, rgba(255,255,255,0.13) 0 1px, transparent 1.6px),
+    radial-gradient(circle at 78% 24%, rgba(255,255,255,0.09) 0 1px, transparent 1.5px),
+    radial-gradient(circle at 60% 74%, rgba(255,255,255,0.08) 0 1px, transparent 1.5px),
+    linear-gradient(rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.02) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(9, 12, 15, 0.35), rgba(9, 12, 15, 0.08));
+  background-size: 180px 180px, 240px 240px, 300px 300px, 36px 36px, 36px 36px, auto;
+}
+
+:root[data-theme='light'] body {
+  background:
+    linear-gradient(rgba(32, 26, 22, 0.028) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(32, 26, 22, 0.024) 1px, transparent 1px),
+    linear-gradient(180deg, rgba(255, 255, 255, 0.22), rgba(219, 210, 199, 0.18));
+  background-size: 36px 36px, 36px 36px, auto;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+@layer components {
+  .btn-primary {
+    @apply rounded-sm px-6 py-3 font-semibold uppercase tracking-[0.18em] text-sm transition-all hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50;
+    color: #f8efe4;
+    background: linear-gradient(180deg, #c98752 0%, #b87441 100%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,0.08),
+      0 0 0 1px rgba(130, 84, 48, 0.28);
+  }
+  
+  .btn-secondary {
+    @apply rounded-sm px-6 py-3 font-semibold uppercase tracking-[0.16em] text-sm transition-colors;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(37, 45, 53, 0.98) 0%, rgba(28, 34, 41, 0.96) 100%);
+    color: var(--ink);
+  }
+  
+  .card {
+    @apply relative overflow-hidden rounded-md p-6;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(31, 37, 44, 0.98) 0%, rgba(22, 28, 34, 0.96) 100%);
+    box-shadow: var(--shadow);
+  }
+  
+  .input-field {
+    @apply w-full rounded-sm px-4 py-3 font-medium placeholder-gray-500 focus:outline-none;
+    border: 1px solid var(--line);
+    background: rgba(17, 22, 28, 0.96);
+    color: var(--ink);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.025);
+  }
+
+  .input-field:focus {
+    border-color: var(--amber);
+    box-shadow:
+      0 0 0 2px rgba(201, 136, 85, 0.12),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  
+  .label {
+    @apply mb-2 block text-sm font-semibold uppercase tracking-[0.18em];
+    color: var(--muted);
+  }
+
+  .section-kicker {
+    @apply text-xs uppercase tracking-[0.32em];
+    color: var(--amber);
+  }
+
+  .metric-tile {
+    @apply relative overflow-hidden rounded-sm p-5;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(39, 46, 54, 0.96) 0%, rgba(29, 35, 42, 0.94) 100%);
+  }
+
+  .glass-panel {
+    @apply relative overflow-hidden rounded-md p-5;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(31, 37, 44, 0.98) 0%, rgba(23, 28, 34, 0.95) 100%);
+    box-shadow: 0 18px 44px rgba(0, 0, 0, 0.24);
+  }
+
+  .status-chip {
+    @apply inline-flex items-center rounded-sm px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em];
+    border: 1px solid var(--line);
+    background: rgba(140, 185, 195, 0.08);
+    color: var(--cyan);
+  }
+
+  .data-label {
+    @apply text-[11px] uppercase tracking-[0.24em];
+    color: var(--muted);
+  }
+
+  .data-value {
+    @apply mt-2 font-black;
+    color: var(--ink);
+  }
+
+  .info-strip {
+    @apply relative overflow-hidden rounded-sm px-4 py-3 text-sm;
+    border: 1px solid var(--line-soft);
+    background: linear-gradient(180deg, rgba(36, 42, 49, 0.96) 0%, rgba(28, 33, 39, 0.94) 100%);
+    color: var(--muted);
+  }
+
+  .terminal-title {
+    font-family: "Space Grotesk", "IBM Plex Sans", sans-serif;
+    letter-spacing: -0.03em;
+  }
+
+  .panel-heading {
+    @apply text-[11px] uppercase tracking-[0.28em];
+    color: var(--muted);
+  }
+}
+
+.card::before,
+.glass-panel::before,
+.metric-tile::before,
+.info-strip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  border-top: 1px solid rgba(255,255,255,0.04);
+}
+
+.card::after,
+.glass-panel::after,
+.metric-tile::after {
+  content: '';
+  position: absolute;
+  left: 14px;
+  right: 14px;
+  top: 12px;
+  height: 1px;
+  background: linear-gradient(90deg, rgba(201,136,85,0.34), rgba(201,136,85,0.04));
+  pointer-events: none;
+}
+
+:root[data-theme='light'] .btn-primary {
+  color: #fff8ef;
+  background: linear-gradient(180deg, #b06f40 0%, #9b6035 100%);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 1px rgba(151, 96, 53, 0.22);
+}
+
+:root[data-theme='light'] .btn-secondary {
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, rgba(240, 234, 225, 0.98) 0%, rgba(229, 221, 210, 0.96) 100%);
+  color: var(--ink);
+}
+
+:root[data-theme='light'] .card {
+  background: linear-gradient(180deg, rgba(247, 242, 235, 0.98) 0%, rgba(236, 228, 217, 0.96) 100%);
+}
+
+:root[data-theme='light'] .glass-panel {
+  background: linear-gradient(180deg, rgba(247, 242, 235, 0.98) 0%, rgba(236, 228, 217, 0.96) 100%);
+}
+
+:root[data-theme='light'] .metric-tile {
+  background: linear-gradient(180deg, rgba(241, 235, 226, 0.98) 0%, rgba(230, 221, 209, 0.96) 100%);
+}
+
+:root[data-theme='light'] .input-field {
+  border: 1px solid var(--line);
+  background: rgba(252, 248, 242, 0.98);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+:root[data-theme='light'] .status-chip {
+  background: rgba(78, 143, 166, 0.1);
+  color: var(--cyan-strong);
+}
+
+:root[data-theme='light'] .info-strip {
+  border: 1px solid var(--line-soft);
+  background: linear-gradient(180deg, rgba(242, 236, 228, 0.98) 0%, rgba(232, 224, 213, 0.96) 100%);
+}
+
+.wallet-adapter-button {
+  background: linear-gradient(180deg, #c98752, #b87441) !important;
+  border-radius: 4px !important;
+  color: #f8efe4 !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 1px rgba(130, 84, 48, 0.28) !important;
+}
+
+.wallet-adapter-button:hover {
+  opacity: 0.94;
+}
+
+:root[data-theme='light'] .wallet-adapter-button {
+  background: linear-gradient(180deg, #b06f40, #9b6035) !important;
+  color: #fff8ef !important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    0 0 0 1px rgba(151, 96, 53, 0.22) !important;
+}

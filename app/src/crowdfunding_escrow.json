@@ -1,0 +1,2864 @@
+{
+  "address": "FWh6EtpM5usrduc89K6YEQZ6GQ5UmycGHfM6VSrPcpUz",
+  "metadata": {
+    "name": "crowdfunding_escrow",
+    "version": "0.1.0",
+    "spec": "0.1.0",
+    "description": "Created with Anchor"
+  },
+  "instructions": [
+    {
+      "name": "cancel_campaign",
+      "docs": [
+        "Cancel campaign (only by creator, before end time)"
+      ],
+      "discriminator": [
+        66,
+        10,
+        32,
+        138,
+        122,
+        36,
+        134,
+        202
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "cancel_pledge",
+      "docs": [
+        "Cancel a pledge and get refund (only if campaign failed)"
+      ],
+      "discriminator": [
+        40,
+        105,
+        61,
+        126,
+        151,
+        153,
+        52,
+        217
+      ],
+      "accounts": [
+        {
+          "name": "backer",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "pledge"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "relations": [
+            "pledge"
+          ]
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pledge",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  101,
+                  100,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "backer"
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        },
+        {
+          "name": "creator",
+          "relations": [
+            "campaign"
+          ]
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "claim",
+      "docs": [
+        "Claim funds if campaign reached its goal"
+      ],
+      "discriminator": [
+        62,
+        198,
+        214,
+        193,
+        213,
+        159,
+        108,
+        210
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "create_milestone",
+      "docs": [
+        "Register a milestone for a campaign. Milestones define staged fund release."
+      ],
+      "discriminator": [
+        239,
+        58,
+        201,
+        28,
+        40,
+        186,
+        173,
+        48
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "arg",
+                "path": "index"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "index",
+          "type": "u64"
+        },
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "amount",
+          "type": "u64"
+        },
+        {
+          "name": "voting_end_time",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "extend_campaign",
+      "docs": [
+        "Extend campaign end time (only by creator, before current end time)"
+      ],
+      "discriminator": [
+        67,
+        80,
+        20,
+        113,
+        198,
+        182,
+        45,
+        223
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "new_end_time",
+          "type": "i64"
+        }
+      ]
+    },
+    {
+      "name": "fail_campaign_and_open_refunds",
+      "docs": [
+        "Fail a milestone campaign after a rejected review and open proportional refunds for backers."
+      ],
+      "discriminator": [
+        60,
+        51,
+        66,
+        91,
+        102,
+        155,
+        91,
+        40
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_campaign",
+      "docs": [
+        "Finalize campaign after deadline and fix its terminal state on-chain"
+      ],
+      "discriminator": [
+        241,
+        76,
+        201,
+        221,
+        33,
+        222,
+        220,
+        138
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign.creator",
+                "account": "Campaign"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "finalize_milestone",
+      "docs": [
+        "Finalize milestone voting once quorum or timeout conditions are met."
+      ],
+      "discriminator": [
+        7,
+        134,
+        89,
+        13,
+        34,
+        31,
+        108,
+        149
+      ],
+      "accounts": [
+        {
+          "name": "campaign",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign.creator",
+                "account": "Campaign"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "initialize_campaign",
+      "docs": [
+        "Initialize a new crowdfunding campaign"
+      ],
+      "discriminator": [
+        169,
+        88,
+        7,
+        6,
+        9,
+        165,
+        65,
+        132
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "arg",
+                "path": "nonce"
+              }
+            ]
+          }
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "title",
+          "type": "string"
+        },
+        {
+          "name": "description",
+          "type": "string"
+        },
+        {
+          "name": "goal_amount",
+          "type": "u64"
+        },
+        {
+          "name": "end_time",
+          "type": "i64"
+        },
+        {
+          "name": "nonce",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "initialize_config",
+      "discriminator": [
+        208,
+        127,
+        21,
+        1,
+        194,
+        190,
+        196,
+        70
+      ],
+      "accounts": [
+        {
+          "name": "admin",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "config",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury"
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "fee_bps",
+          "type": "u16"
+        }
+      ]
+    },
+    {
+      "name": "open_dispute",
+      "docs": [
+        "Open a formal dispute for a rejected milestone so the arbiter can make the final decision."
+      ],
+      "discriminator": [
+        137,
+        25,
+        99,
+        119,
+        23,
+        223,
+        161,
+        42
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "pledge",
+      "docs": [
+        "Pledge to a campaign"
+      ],
+      "discriminator": [
+        235,
+        47,
+        156,
+        254,
+        0,
+        88,
+        212,
+        142
+      ],
+      "accounts": [
+        {
+          "name": "backer",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign",
+          "writable": true
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pledge",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  101,
+                  100,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "backer"
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        },
+        {
+          "name": "creator",
+          "relations": [
+            "campaign"
+          ]
+        }
+      ],
+      "args": [
+        {
+          "name": "amount",
+          "type": "u64"
+        }
+      ]
+    },
+    {
+      "name": "release_milestone_funds",
+      "docs": [
+        "Release milestone funds after approval. Gross milestone amount is split into creator payout and treasury fee."
+      ],
+      "discriminator": [
+        44,
+        226,
+        97,
+        240,
+        228,
+        187,
+        163,
+        115
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "resolve_dispute",
+      "docs": [
+        "Resolve a disputed milestone via arbiter decision."
+      ],
+      "discriminator": [
+        231,
+        6,
+        202,
+        6,
+        96,
+        103,
+        12,
+        230
+      ],
+      "accounts": [
+        {
+          "name": "arbiter",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign.creator",
+                "account": "Campaign"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        }
+      ],
+      "args": [
+        {
+          "name": "decision",
+          "type": {
+            "defined": {
+              "name": "ArbitrationDecision"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "settle_campaign",
+      "docs": [
+        "Settle campaign after deadline:",
+        "- successful campaigns are automatically funded to creator/treasury",
+        "- failed campaigns are finalized into Failed state and open refunds"
+      ],
+      "discriminator": [
+        118,
+        148,
+        120,
+        120,
+        113,
+        252,
+        70,
+        175
+      ],
+      "accounts": [
+        {
+          "name": "settler",
+          "writable": true,
+          "signer": true
+        },
+        {
+          "name": "campaign",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign.creator",
+                "account": "Campaign"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "campaign_vault",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  118,
+                  97,
+                  117,
+                  108,
+                  116
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "config",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  111,
+                  110,
+                  102,
+                  105,
+                  103
+                ]
+              }
+            ]
+          }
+        },
+        {
+          "name": "treasury",
+          "writable": true
+        },
+        {
+          "name": "creator",
+          "writable": true
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "submit_milestone",
+      "docs": [
+        "Submit a milestone for backer review after fundraising succeeds."
+      ],
+      "discriminator": [
+        35,
+        96,
+        220,
+        215,
+        102,
+        83,
+        139,
+        52
+      ],
+      "accounts": [
+        {
+          "name": "creator",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "campaign"
+          ]
+        },
+        {
+          "name": "campaign",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "creator"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": []
+    },
+    {
+      "name": "vote_milestone",
+      "docs": [
+        "Cast a weighted vote for a submitted milestone."
+      ],
+      "discriminator": [
+        43,
+        27,
+        71,
+        239,
+        231,
+        20,
+        102,
+        156
+      ],
+      "accounts": [
+        {
+          "name": "backer",
+          "writable": true,
+          "signer": true,
+          "relations": [
+            "pledge"
+          ]
+        },
+        {
+          "name": "campaign",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  99,
+                  97,
+                  109,
+                  112,
+                  97,
+                  105,
+                  103,
+                  110
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign.creator",
+                "account": "Campaign"
+              },
+              {
+                "kind": "account",
+                "path": "campaign.nonce",
+                "account": "Campaign"
+              }
+            ]
+          },
+          "relations": [
+            "milestone",
+            "pledge"
+          ]
+        },
+        {
+          "name": "milestone",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              },
+              {
+                "kind": "account",
+                "path": "milestone.index",
+                "account": "Milestone"
+              }
+            ]
+          }
+        },
+        {
+          "name": "pledge",
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  112,
+                  108,
+                  101,
+                  100,
+                  103,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "backer"
+              },
+              {
+                "kind": "account",
+                "path": "campaign"
+              }
+            ]
+          }
+        },
+        {
+          "name": "milestone_vote",
+          "writable": true,
+          "pda": {
+            "seeds": [
+              {
+                "kind": "const",
+                "value": [
+                  109,
+                  105,
+                  108,
+                  101,
+                  115,
+                  116,
+                  111,
+                  110,
+                  101,
+                  95,
+                  118,
+                  111,
+                  116,
+                  101
+                ]
+              },
+              {
+                "kind": "account",
+                "path": "milestone"
+              },
+              {
+                "kind": "account",
+                "path": "backer"
+              }
+            ]
+          }
+        },
+        {
+          "name": "system_program",
+          "address": "11111111111111111111111111111111"
+        },
+        {
+          "name": "clock",
+          "address": "SysvarC1ock11111111111111111111111111111111"
+        }
+      ],
+      "args": [
+        {
+          "name": "approve",
+          "type": "bool"
+        }
+      ]
+    }
+  ],
+  "accounts": [
+    {
+      "name": "Campaign",
+      "discriminator": [
+        50,
+        40,
+        49,
+        11,
+        157,
+        220,
+        229,
+        192
+      ]
+    },
+    {
+      "name": "Config",
+      "discriminator": [
+        155,
+        12,
+        170,
+        224,
+        30,
+        250,
+        204,
+        130
+      ]
+    },
+    {
+      "name": "Milestone",
+      "discriminator": [
+        38,
+        210,
+        239,
+        177,
+        85,
+        184,
+        10,
+        44
+      ]
+    },
+    {
+      "name": "MilestoneVote",
+      "discriminator": [
+        5,
+        129,
+        119,
+        11,
+        182,
+        73,
+        115,
+        227
+      ]
+    },
+    {
+      "name": "PledgeAccount",
+      "discriminator": [
+        247,
+        217,
+        127,
+        216,
+        219,
+        207,
+        43,
+        79
+      ]
+    }
+  ],
+  "events": [
+    {
+      "name": "CampaignCancelled",
+      "discriminator": [
+        121,
+        171,
+        21,
+        55,
+        56,
+        234,
+        121,
+        44
+      ]
+    },
+    {
+      "name": "CampaignClaimed",
+      "discriminator": [
+        143,
+        249,
+        122,
+        199,
+        87,
+        252,
+        204,
+        73
+      ]
+    },
+    {
+      "name": "CampaignCreated",
+      "discriminator": [
+        9,
+        98,
+        69,
+        61,
+        53,
+        131,
+        64,
+        152
+      ]
+    },
+    {
+      "name": "CampaignEnteredRefundMode",
+      "discriminator": [
+        44,
+        120,
+        199,
+        68,
+        190,
+        237,
+        244,
+        32
+      ]
+    },
+    {
+      "name": "CampaignExtended",
+      "discriminator": [
+        187,
+        91,
+        172,
+        237,
+        88,
+        36,
+        84,
+        67
+      ]
+    },
+    {
+      "name": "CampaignFinalized",
+      "discriminator": [
+        219,
+        169,
+        142,
+        66,
+        105,
+        67,
+        124,
+        255
+      ]
+    },
+    {
+      "name": "CampaignSettled",
+      "discriminator": [
+        117,
+        145,
+        212,
+        210,
+        201,
+        63,
+        135,
+        24
+      ]
+    },
+    {
+      "name": "ConfigInitialized",
+      "discriminator": [
+        181,
+        49,
+        200,
+        156,
+        19,
+        167,
+        178,
+        91
+      ]
+    },
+    {
+      "name": "DisputeResolved",
+      "discriminator": [
+        121,
+        64,
+        249,
+        153,
+        139,
+        128,
+        236,
+        187
+      ]
+    },
+    {
+      "name": "MilestoneCreated",
+      "discriminator": [
+        151,
+        154,
+        159,
+        254,
+        50,
+        174,
+        22,
+        209
+      ]
+    },
+    {
+      "name": "MilestoneDisputed",
+      "discriminator": [
+        83,
+        106,
+        229,
+        228,
+        159,
+        61,
+        122,
+        16
+      ]
+    },
+    {
+      "name": "MilestoneFinalized",
+      "discriminator": [
+        111,
+        135,
+        213,
+        124,
+        28,
+        224,
+        152,
+        217
+      ]
+    },
+    {
+      "name": "MilestoneFundsReleased",
+      "discriminator": [
+        222,
+        23,
+        250,
+        143,
+        182,
+        152,
+        202,
+        77
+      ]
+    },
+    {
+      "name": "MilestoneSubmitted",
+      "discriminator": [
+        242,
+        19,
+        75,
+        99,
+        12,
+        28,
+        19,
+        33
+      ]
+    },
+    {
+      "name": "MilestoneVoteCast",
+      "discriminator": [
+        251,
+        202,
+        241,
+        169,
+        201,
+        116,
+        60,
+        46
+      ]
+    },
+    {
+      "name": "PledgeMade",
+      "discriminator": [
+        73,
+        219,
+        121,
+        0,
+        211,
+        70,
+        19,
+        58
+      ]
+    },
+    {
+      "name": "PledgeRefunded",
+      "discriminator": [
+        81,
+        129,
+        58,
+        177,
+        203,
+        224,
+        70,
+        191
+      ]
+    }
+  ],
+  "errors": [
+    {
+      "code": 6000,
+      "name": "InvalidGoalAmount",
+      "msg": "Invalid goal amount"
+    },
+    {
+      "code": 6001,
+      "name": "InvalidEndTime",
+      "msg": "Invalid end time"
+    },
+    {
+      "code": 6002,
+      "name": "TitleTooLong",
+      "msg": "Title too long (max 100 characters)"
+    },
+    {
+      "code": 6003,
+      "name": "DescriptionTooLong",
+      "msg": "Description too long (max 1000 characters)"
+    },
+    {
+      "code": 6004,
+      "name": "InvalidPledgeAmount",
+      "msg": "Invalid pledge amount"
+    },
+    {
+      "code": 6005,
+      "name": "CampaignAlreadyClaimed",
+      "msg": "Campaign already claimed"
+    },
+    {
+      "code": 6006,
+      "name": "CampaignCancelled",
+      "msg": "Campaign cancelled"
+    },
+    {
+      "code": 6007,
+      "name": "CampaignEnded",
+      "msg": "Campaign ended"
+    },
+    {
+      "code": 6008,
+      "name": "CampaignNotEnded",
+      "msg": "Campaign not ended"
+    },
+    {
+      "code": 6009,
+      "name": "Unauthorized",
+      "msg": "Unauthorized"
+    },
+    {
+      "code": 6010,
+      "name": "PledgeAlreadyRefunded",
+      "msg": "Pledge already refunded"
+    },
+    {
+      "code": 6011,
+      "name": "RefundNotAvailable",
+      "msg": "Refund not available"
+    },
+    {
+      "code": 6012,
+      "name": "GoalNotReached",
+      "msg": "Goal not reached"
+    },
+    {
+      "code": 6013,
+      "name": "CampaignAlreadyCancelled",
+      "msg": "Campaign already cancelled"
+    },
+    {
+      "code": 6014,
+      "name": "AmountOverflow",
+      "msg": "Amount overflow"
+    },
+    {
+      "code": 6015,
+      "name": "AmountUnderflow",
+      "msg": "Amount underflow"
+    },
+    {
+      "code": 6016,
+      "name": "InvalidCampaignState",
+      "msg": "Invalid campaign state for this operation"
+    },
+    {
+      "code": 6017,
+      "name": "CampaignAlreadyFinalized",
+      "msg": "Campaign already finalized"
+    },
+    {
+      "code": 6018,
+      "name": "InvalidFeeBps",
+      "msg": "Invalid fee bps"
+    },
+    {
+      "code": 6019,
+      "name": "InvalidMilestoneAmount",
+      "msg": "Invalid milestone amount"
+    },
+    {
+      "code": 6020,
+      "name": "MilestoneTotalExceeded",
+      "msg": "Milestone total exceeds campaign goal amount"
+    },
+    {
+      "code": 6021,
+      "name": "MilestoneDescriptionTooLong",
+      "msg": "Milestone description too long (max 300 characters)"
+    },
+    {
+      "code": 6022,
+      "name": "MilestoneFlowRequired",
+      "msg": "Milestone flow is required for this campaign"
+    },
+    {
+      "code": 6023,
+      "name": "MilestoneFlowNotConfigured",
+      "msg": "Milestone flow is not configured for this campaign"
+    },
+    {
+      "code": 6024,
+      "name": "InvalidMilestoneState",
+      "msg": "Invalid milestone state for this operation"
+    },
+    {
+      "code": 6025,
+      "name": "VotingStillOpen",
+      "msg": "Voting is still open"
+    },
+    {
+      "code": 6026,
+      "name": "VotingWindowClosed",
+      "msg": "Voting window is already closed"
+    },
+    {
+      "code": 6027,
+      "name": "InvalidVotingEndTime",
+      "msg": "Invalid voting end time"
+    },
+    {
+      "code": 6028,
+      "name": "MilestoneAlreadyReleased",
+      "msg": "Milestone has already been released"
+    },
+    {
+      "code": 6029,
+      "name": "NotABacker",
+      "msg": "Not a valid backer for milestone voting"
+    },
+    {
+      "code": 6030,
+      "name": "MilestoneNotRejected",
+      "msg": "Milestone must be rejected before opening refunds"
+    },
+    {
+      "code": 6031,
+      "name": "MilestoneNotDisputed",
+      "msg": "Milestone must be disputed before arbitration"
+    },
+    {
+      "code": 6032,
+      "name": "InsufficientEscrowBalance",
+      "msg": "Insufficient escrow balance for milestone release"
+    },
+    {
+      "code": 6033,
+      "name": "RefundAlreadyClaimed",
+      "msg": "Refund already claimed"
+    }
+  ],
+  "types": [
+    {
+      "name": "ArbitrationDecision",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "ApproveMilestone"
+          },
+          {
+            "name": "OpenRefunds"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Campaign",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "goal_amount",
+            "type": "u64"
+          },
+          {
+            "name": "current_amount",
+            "type": "u64"
+          },
+          {
+            "name": "backers_count",
+            "type": "u64"
+          },
+          {
+            "name": "total_pledged",
+            "type": "u64"
+          },
+          {
+            "name": "total_refunded",
+            "type": "u64"
+          },
+          {
+            "name": "claimed_amount",
+            "type": "u64"
+          },
+          {
+            "name": "milestone_count",
+            "type": "u64"
+          },
+          {
+            "name": "released_milestones",
+            "type": "u64"
+          },
+          {
+            "name": "milestone_amount_total",
+            "type": "u64"
+          },
+          {
+            "name": "milestone_amount_released",
+            "type": "u64"
+          },
+          {
+            "name": "refund_snapshot_amount",
+            "type": "u64"
+          },
+          {
+            "name": "refund_snapshot_total_pledged",
+            "type": "u64"
+          },
+          {
+            "name": "start_time",
+            "type": "i64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "CampaignState"
+              }
+            }
+          },
+          {
+            "name": "is_claimed",
+            "type": "bool"
+          },
+          {
+            "name": "is_cancelled",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          },
+          {
+            "name": "campaign_vault_bump",
+            "type": "u8"
+          },
+          {
+            "name": "nonce",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignCancelled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignClaimed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "creator",
+            "type": "pubkey"
+          },
+          {
+            "name": "goal_amount",
+            "type": "u64"
+          },
+          {
+            "name": "end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignEnteredRefundMode",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "refund_pool_amount",
+            "type": "u64"
+          },
+          {
+            "name": "refund_pool_total_pledged",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignExtended",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "old_end_time",
+            "type": "i64"
+          },
+          {
+            "name": "new_end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "final_state",
+            "type": {
+              "defined": {
+                "name": "CampaignState"
+              }
+            }
+          },
+          {
+            "name": "total_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignSettled",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "final_state",
+            "type": {
+              "defined": {
+                "name": "CampaignState"
+              }
+            }
+          },
+          {
+            "name": "creator_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "CampaignState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Active"
+          },
+          {
+            "name": "Successful"
+          },
+          {
+            "name": "Failed"
+          },
+          {
+            "name": "Cancelled"
+          },
+          {
+            "name": "Claimed"
+          }
+        ]
+      }
+    },
+    {
+      "name": "Config",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "arbiter",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u16"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "ConfigInitialized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "admin",
+            "type": "pubkey"
+          },
+          {
+            "name": "arbiter",
+            "type": "pubkey"
+          },
+          {
+            "name": "treasury",
+            "type": "pubkey"
+          },
+          {
+            "name": "fee_bps",
+            "type": "u16"
+          }
+        ]
+      }
+    },
+    {
+      "name": "DisputeResolved",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "resolved_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "decision",
+            "type": {
+              "defined": {
+                "name": "ArbitrationDecision"
+              }
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "Milestone",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "name": "description",
+            "type": "string"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "votes_for",
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "type": "u64"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          },
+          {
+            "name": "voting_end_time",
+            "type": "i64"
+          },
+          {
+            "name": "released_amount",
+            "type": "u64"
+          },
+          {
+            "name": "dispute_opened_by",
+            "type": "pubkey"
+          },
+          {
+            "name": "state",
+            "type": {
+              "defined": {
+                "name": "MilestoneState"
+              }
+            }
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneCreated",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "voting_end_time",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneDisputed",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "opened_by",
+            "type": "pubkey"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneFinalized",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "final_state",
+            "type": {
+              "defined": {
+                "name": "MilestoneState"
+              }
+            }
+          },
+          {
+            "name": "votes_for",
+            "type": "u64"
+          },
+          {
+            "name": "votes_against",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneFundsReleased",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "gross_amount",
+            "type": "u64"
+          },
+          {
+            "name": "creator_amount",
+            "type": "u64"
+          },
+          {
+            "name": "fee_amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneState",
+      "type": {
+        "kind": "enum",
+        "variants": [
+          {
+            "name": "Pending"
+          },
+          {
+            "name": "ReadyForReview"
+          },
+          {
+            "name": "Approved"
+          },
+          {
+            "name": "Rejected"
+          },
+          {
+            "name": "Disputed"
+          },
+          {
+            "name": "Released"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneSubmitted",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "index",
+            "type": "u64"
+          },
+          {
+            "name": "submitted_at",
+            "type": "i64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneVote",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "backer",
+            "type": "pubkey"
+          },
+          {
+            "name": "approve",
+            "type": "bool"
+          },
+          {
+            "name": "weight",
+            "type": "u64"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "MilestoneVoteCast",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "milestone",
+            "type": "pubkey"
+          },
+          {
+            "name": "backer",
+            "type": "pubkey"
+          },
+          {
+            "name": "approve",
+            "type": "bool"
+          },
+          {
+            "name": "weight",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PledgeAccount",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "backer",
+            "type": "pubkey"
+          },
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          },
+          {
+            "name": "refunded_amount",
+            "type": "u64"
+          },
+          {
+            "name": "is_refunded",
+            "type": "bool"
+          },
+          {
+            "name": "bump",
+            "type": "u8"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PledgeMade",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "backer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    },
+    {
+      "name": "PledgeRefunded",
+      "type": {
+        "kind": "struct",
+        "fields": [
+          {
+            "name": "campaign",
+            "type": "pubkey"
+          },
+          {
+            "name": "backer",
+            "type": "pubkey"
+          },
+          {
+            "name": "amount",
+            "type": "u64"
+          }
+        ]
+      }
+    }
+  ]
+}
