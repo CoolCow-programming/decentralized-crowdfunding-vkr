@@ -30,6 +30,117 @@ interface ActionAvailability {
   reason?: string;
 }
 
+function getMilestoneNextStep(
+  milestone: Milestone,
+  campaign: Campaign,
+  isOwner: boolean,
+  hasWallet: boolean,
+  isArbiter: boolean
+): { tone: NoticeTone; message: string } {
+  if (milestone.state === 'pending') {
+    if (campaign.state !== 'successful') {
+      return {
+        tone: 'error',
+        message: 'Этап создан, но ещё не запущен. Сначала доведите кампанию до Successful через settlement после достижения цели или дедлайна, затем станет доступна кнопка Submit milestone.',
+      };
+    }
+
+    if (!isOwner) {
+      return {
+        tone: 'error',
+        message: 'Этап ждёт запуска создателем кампании. Под кошельком создателя появится кнопка Submit milestone.',
+      };
+    }
+
+    if (!hasWallet) {
+      return {
+        tone: 'error',
+        message: 'Подключите кошелёк создателя кампании, чтобы запустить этап кнопкой Submit milestone.',
+      };
+    }
+
+    return {
+      tone: 'success',
+      message: 'Этап готов к запуску. Нажмите Submit milestone, чтобы открыть голосование бэкеров.',
+    };
+  }
+
+  if (milestone.state === 'readyForReview') {
+    if (!hasWallet) {
+      return {
+        tone: 'error',
+        message: 'Review уже открыт. Подключите кошелёк, чтобы проголосовать или завершить review.',
+      };
+    }
+
+    if (isOwner) {
+      return {
+        tone: 'success',
+        message: 'Этап находится на review. Дождитесь голосов бэкеров и затем нажмите Finalize review.',
+      };
+    }
+
+    return {
+      tone: 'success',
+      message: 'Этап находится на review. Вы можете проголосовать за или против, затем любой подключённый участник может вызвать Finalize review.',
+    };
+  }
+
+  if (milestone.state === 'approved') {
+    if (isOwner) {
+      return {
+        tone: 'success',
+        message: 'Этап одобрен. Теперь можно вывести эту часть средств кнопкой Release funds.',
+      };
+    }
+
+    return {
+      tone: 'success',
+      message: 'Этап одобрен. Следующий шаг за создателем кампании: Release funds.',
+    };
+  }
+
+  if (milestone.state === 'released') {
+    return {
+      tone: 'success',
+      message: 'Средства по этапу уже выведены из escrow-vault.',
+    };
+  }
+
+  if (milestone.state === 'rejected') {
+    if (isOwner) {
+      return {
+        tone: 'error',
+        message: 'Этап отклонён. Можно повторно отправить его на review, открыть dispute или перевести кампанию в refunds.',
+      };
+    }
+
+    return {
+      tone: 'error',
+      message: 'Этап отклонён. Дальнейшее действие принимает создатель кампании: повторная отправка, dispute или refunds.',
+    };
+  }
+
+  if (milestone.state === 'disputed') {
+    if (isArbiter) {
+      return {
+        tone: 'success',
+        message: 'Открыт спор. Под кошельком арбитра доступны Arbiter approve и Arbiter refunds.',
+      };
+    }
+
+    return {
+      tone: 'error',
+      message: 'Открыт спор. Финальное решение должен принять арбитр.',
+    };
+  }
+
+  return {
+    tone: 'error',
+    message: 'Состояние этапа требует ручной проверки.',
+  };
+}
+
 export default function CampaignDetailsPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -389,6 +500,11 @@ export default function CampaignDetailsPage() {
   const nextMilestoneIndex = milestones.length;
   const remainingMilestoneBudget = Math.max(0, Number(campaign.goalAmount - campaign.milestoneAmountTotal) / 1_000_000_000);
   const minVotingEnd = new Date(Date.now() + 60000).toISOString().slice(0, 16);
+  const milestoneFlowStage = campaign.state === 'successful'
+    ? 'Сбор завершён успешно. Теперь этапы можно запускать на review и выпускать по ним средства.'
+    : campaign.state === 'active'
+      ? 'Пока идёт сбор, milestones только настраиваются. Запуск review станет доступен после перехода кампании в Successful.'
+      : 'Milestone-flow использует этапную выдачу после Successful. В текущем состоянии новые действия зависят от статуса этапов ниже.';
   const claimAction: ActionAvailability = statusValue.isOwner || !publicKey
     ? {
         visible: !statusValue.hasMilestones && (statusValue.isOwner || campaign.state === 'successful' || statusValue.goalReached),
@@ -575,6 +691,9 @@ export default function CampaignDetailsPage() {
                 <p className="mt-2 text-lg font-bold" style={{ color: 'var(--ink)' }}>
                   {Number(campaign.milestoneCount) > 0 ? `${campaign.milestoneCount.toString()} этап(ов)` : 'Не настроен'}
                 </p>
+                <p className="mt-2 text-sm leading-6" style={{ color: 'var(--muted)' }}>
+                  {milestoneFlowStage}
+                </p>
               </div>
               <div className="text-right">
                 <p className="panel-heading">Покрытие этапами</p>
@@ -604,13 +723,16 @@ export default function CampaignDetailsPage() {
                 <p className="mt-2 font-bold" style={{ color: 'var(--ink)' }}>{remainingMilestoneBudget.toFixed(4)} SOL</p>
               </div>
             </div>
+            <div className="mt-4 rounded-xl p-4" style={{ border: '1px dashed var(--line)', color: 'var(--muted)' }}>
+              Цикл этапа: 1) Add milestone, 2) Submit milestone, 3) Backers vote, 4) Finalize review, 5) Release funds. Этапы не позволяют выводить деньги во время сбора средств.
+            </div>
           </div>
 
           {statusValue.isOwner && (campaign.state === 'active' || campaign.state === 'successful') && (
             <div className="mb-8 rounded-xl p-5" style={{ border: '1px solid var(--line)', background: 'var(--panel-bg)' }}>
               <p className="panel-heading">Новый milestone</p>
-              <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>
-                Следующий индекс этапа: {nextMilestoneIndex}. Сумма всех этапов не должна превышать цель кампании.
+                <p className="mt-2 text-sm" style={{ color: 'var(--muted)' }}>
+                Следующий индекс этапа: {nextMilestoneIndex}. Сумма всех этапов не должна превышать цель кампании. Создание этапа только регистрирует его on-chain, но не запускает review автоматически.
               </p>
               <div className="mt-4 grid gap-4">
                 <input
@@ -674,6 +796,13 @@ export default function CampaignDetailsPage() {
                   const voteShare = Number(campaign.totalPledged) > 0
                     ? (Number(milestone.votesFor + milestone.votesAgainst) / Number(campaign.totalPledged)) * 100
                     : 0;
+                  const nextStep = getMilestoneNextStep(
+                    milestone,
+                    campaign,
+                    !!statusValue.isOwner,
+                    !!publicKey,
+                    !!isArbiter
+                  );
 
                   return (
                     <div
@@ -722,6 +851,17 @@ export default function CampaignDetailsPage() {
                           Спор открыт. Финальное решение должен принять арбитр: подтвердить milestone или открыть возвраты.
                         </div>
                       )}
+
+                      <div
+                        className="mt-4 rounded-xl p-4"
+                        style={
+                          nextStep.tone === 'success'
+                            ? { border: '1px solid var(--success-border)', background: 'var(--success-bg)', color: 'var(--success-text)' }
+                            : { border: '1px solid var(--info-border)', background: 'var(--info-bg)', color: 'var(--info-text)' }
+                        }
+                      >
+                        {nextStep.message}
+                      </div>
 
                       <div className="mt-4">
                         <div className="mb-2 flex justify-between text-xs" style={{ color: 'var(--muted)' }}>

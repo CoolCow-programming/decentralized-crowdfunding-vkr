@@ -355,17 +355,19 @@ pub mod crowdfunding_escrow {
             CampaignError::InvalidMilestoneState
         );
 
-        let approvals_reached = (milestone.votes_for as u128) * 2 > campaign.total_pledged as u128;
-        let rejections_reached =
-            (milestone.votes_against as u128) * 2 >= campaign.total_pledged as u128;
+        let total_votes = milestone
+            .votes_for
+            .checked_add(milestone.votes_against)
+            .ok_or(CampaignError::AmountOverflow)?;
+        let quorum_reached = (total_votes as u128) * 2 >= campaign.total_pledged as u128;
         let voting_ended = clock.unix_timestamp > milestone.voting_end_time;
 
         require!(
-            approvals_reached || rejections_reached || voting_ended,
+            quorum_reached || voting_ended,
             CampaignError::VotingStillOpen
         );
 
-        if approvals_reached {
+        if quorum_reached && milestone.votes_for > milestone.votes_against {
             milestone.set_state(MilestoneState::Approved);
         } else {
             milestone.set_state(MilestoneState::Rejected);

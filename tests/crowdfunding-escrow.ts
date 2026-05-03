@@ -3209,6 +3209,407 @@ describe("crowdfunding-escrow", () => {
       assert.equal(milestoneAccount.votesAgainst.toNumber(), 0);
     });
 
+    it("Should not finalize milestone before timeout when vote quorum is below 50 percent", async () => {
+      const nonce = new BN(148);
+      const endTime = new BN(Math.floor(Date.now() / 1000) + 6);
+      const voteEndTime = new BN(Math.floor(Date.now() / 1000) + 3600);
+      const goal = new BN(100_000_000);
+      const milestoneIndex = new BN(0);
+      const backerA = anchor.web3.Keypair.generate();
+      const backerB = anchor.web3.Keypair.generate();
+      const backerAAmount = new BN(40_000_000);
+      const backerBAmount = new BN(60_000_000);
+
+      for (const signer of [backerA, backerB]) {
+        const sig = await provider.connection.requestAirdrop(signer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+        await provider.connection.confirmTransaction(sig);
+      }
+
+      const [campaign] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("campaign"), creator.toBuffer(), nonce.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+      const [vault] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeA] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerA.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeB] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerB.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const milestone = findMilestonePda(campaign, milestoneIndex);
+      const milestoneVoteA = findMilestoneVotePda(milestone, backerA.publicKey);
+
+      await program.methods
+        .initializeCampaign("Quorum Guard", "Milestone needs at least half of pledged volume to vote", goal, endTime, nonce)
+        .accounts({
+          creator,
+          campaign,
+          campaignVault: vault,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .createMilestone(milestoneIndex, "Stage", "Quorum guard", goal, voteEndTime)
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+
+      await program.methods
+        .pledge(backerAAmount)
+        .accounts({
+          backer: backerA.publicKey,
+          campaign,
+          campaignVault: vault,
+          pledge: pledgeA,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+          creator,
+        })
+        .signers([backerA])
+        .rpc();
+
+      await program.methods
+        .pledge(backerBAmount)
+        .accounts({
+          backer: backerB.publicKey,
+          campaign,
+          campaignVault: vault,
+          pledge: pledgeB,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+          creator,
+        })
+        .signers([backerB])
+        .rpc();
+
+      await advancePastUnixTimestamp(endTime);
+      await finalizeCampaign(campaign);
+
+      await program.methods
+        .submitMilestone()
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .voteMilestone(true)
+        .accounts({
+          backer: backerA.publicKey,
+          campaign,
+          milestone,
+          pledge: pledgeA,
+          milestoneVote: milestoneVoteA,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .signers([backerA])
+        .rpc();
+
+      await expectProgramError(
+        program.methods
+          .finalizeMilestone()
+          .accounts({
+            campaign,
+            milestone,
+            clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+          })
+          .rpc(),
+        "Voting is still open"
+      );
+    });
+
+    it("Should approve milestone at exact 50 percent quorum when votesFor is greater than votesAgainst", async () => {
+      const nonce = new BN(149);
+      const endTime = new BN(Math.floor(Date.now() / 1000) + 6);
+      const voteEndTime = new BN(Math.floor(Date.now() / 1000) + 3600);
+      const goal = new BN(100_000_000);
+      const milestoneIndex = new BN(0);
+      const backerA = anchor.web3.Keypair.generate();
+      const backerB = anchor.web3.Keypair.generate();
+      const backerC = anchor.web3.Keypair.generate();
+      const backerAAmount = new BN(30_000_000);
+      const backerBAmount = new BN(20_000_000);
+      const backerCAmount = new BN(50_000_000);
+
+      for (const signer of [backerA, backerB, backerC]) {
+        const sig = await provider.connection.requestAirdrop(signer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+        await provider.connection.confirmTransaction(sig);
+      }
+
+      const [campaign] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("campaign"), creator.toBuffer(), nonce.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+      const [vault] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeA] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerA.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeB] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerB.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeC] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerC.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const milestone = findMilestonePda(campaign, milestoneIndex);
+      const milestoneVoteA = findMilestoneVotePda(milestone, backerA.publicKey);
+      const milestoneVoteB = findMilestoneVotePda(milestone, backerB.publicKey);
+
+      await program.methods
+        .initializeCampaign("Exact Quorum Approve", "Milestone should approve at exact quorum with majority for", goal, endTime, nonce)
+        .accounts({
+          creator,
+          campaign,
+          campaignVault: vault,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .createMilestone(milestoneIndex, "Stage", "Exact quorum approve", goal, voteEndTime)
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+
+      for (const [backer, amount, pledge] of [
+        [backerA, backerAAmount, pledgeA],
+        [backerB, backerBAmount, pledgeB],
+        [backerC, backerCAmount, pledgeC],
+      ] as const) {
+        await program.methods
+          .pledge(amount)
+          .accounts({
+            backer: backer.publicKey,
+            campaign,
+            campaignVault: vault,
+            pledge,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+            creator,
+          })
+          .signers([backer])
+          .rpc();
+      }
+
+      await advancePastUnixTimestamp(endTime);
+      await finalizeCampaign(campaign);
+
+      await program.methods
+        .submitMilestone()
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .voteMilestone(true)
+        .accounts({
+          backer: backerA.publicKey,
+          campaign,
+          milestone,
+          pledge: pledgeA,
+          milestoneVote: milestoneVoteA,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .signers([backerA])
+        .rpc();
+
+      await program.methods
+        .voteMilestone(false)
+        .accounts({
+          backer: backerB.publicKey,
+          campaign,
+          milestone,
+          pledge: pledgeB,
+          milestoneVote: milestoneVoteB,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .signers([backerB])
+        .rpc();
+
+      await program.methods
+        .finalizeMilestone()
+        .accounts({
+          campaign,
+          milestone,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      const milestoneAccount = await program.account.milestone.fetch(milestone);
+      assert.deepEqual(milestoneAccount.state, { approved: {} });
+      assert.equal(milestoneAccount.votesFor.toNumber(), backerAAmount.toNumber());
+      assert.equal(milestoneAccount.votesAgainst.toNumber(), backerBAmount.toNumber());
+    });
+
+    it("Should reject milestone at exact 50 percent quorum when votes are tied", async () => {
+      const nonce = new BN(150);
+      const endTime = new BN(Math.floor(Date.now() / 1000) + 6);
+      const voteEndTime = new BN(Math.floor(Date.now() / 1000) + 3600);
+      const goal = new BN(100_000_000);
+      const milestoneIndex = new BN(0);
+      const backerA = anchor.web3.Keypair.generate();
+      const backerB = anchor.web3.Keypair.generate();
+      const backerC = anchor.web3.Keypair.generate();
+      const splitAmount = new BN(25_000_000);
+      const idleAmount = new BN(50_000_000);
+
+      for (const signer of [backerA, backerB, backerC]) {
+        const sig = await provider.connection.requestAirdrop(signer.publicKey, 2 * anchor.web3.LAMPORTS_PER_SOL);
+        await provider.connection.confirmTransaction(sig);
+      }
+
+      const [campaign] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("campaign"), creator.toBuffer(), nonce.toArrayLike(Buffer, "le", 8)],
+        program.programId
+      );
+      const [vault] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("vault"), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeA] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerA.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeB] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerB.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const [pledgeC] = anchor.web3.PublicKey.findProgramAddressSync(
+        [Buffer.from("pledge"), backerC.publicKey.toBuffer(), campaign.toBuffer()],
+        program.programId
+      );
+      const milestone = findMilestonePda(campaign, milestoneIndex);
+      const milestoneVoteA = findMilestoneVotePda(milestone, backerA.publicKey);
+      const milestoneVoteB = findMilestoneVotePda(milestone, backerB.publicKey);
+
+      await program.methods
+        .initializeCampaign("Exact Quorum Tie", "Milestone should reject on tie at exact quorum", goal, endTime, nonce)
+        .accounts({
+          creator,
+          campaign,
+          campaignVault: vault,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .createMilestone(milestoneIndex, "Stage", "Exact quorum tie", goal, voteEndTime)
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          systemProgram: anchor.web3.SystemProgram.programId,
+        })
+        .rpc();
+
+      for (const [backer, amount, pledge] of [
+        [backerA, splitAmount, pledgeA],
+        [backerB, splitAmount, pledgeB],
+        [backerC, idleAmount, pledgeC],
+      ] as const) {
+        await program.methods
+          .pledge(amount)
+          .accounts({
+            backer: backer.publicKey,
+            campaign,
+            campaignVault: vault,
+            pledge,
+            systemProgram: anchor.web3.SystemProgram.programId,
+            clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+            creator,
+          })
+          .signers([backer])
+          .rpc();
+      }
+
+      await advancePastUnixTimestamp(endTime);
+      await finalizeCampaign(campaign);
+
+      await program.methods
+        .submitMilestone()
+        .accounts({
+          creator,
+          campaign,
+          milestone,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      await program.methods
+        .voteMilestone(true)
+        .accounts({
+          backer: backerA.publicKey,
+          campaign,
+          milestone,
+          pledge: pledgeA,
+          milestoneVote: milestoneVoteA,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .signers([backerA])
+        .rpc();
+
+      await program.methods
+        .voteMilestone(false)
+        .accounts({
+          backer: backerB.publicKey,
+          campaign,
+          milestone,
+          pledge: pledgeB,
+          milestoneVote: milestoneVoteB,
+          systemProgram: anchor.web3.SystemProgram.programId,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .signers([backerB])
+        .rpc();
+
+      await program.methods
+        .finalizeMilestone()
+        .accounts({
+          campaign,
+          milestone,
+          clock: anchor.web3.SYSVAR_CLOCK_PUBKEY,
+        })
+        .rpc();
+
+      const milestoneAccount = await program.account.milestone.fetch(milestone);
+      assert.deepEqual(milestoneAccount.state, { rejected: {} });
+      assert.equal(milestoneAccount.votesFor.toNumber(), splitAmount.toNumber());
+      assert.equal(milestoneAccount.votesAgainst.toNumber(), splitAmount.toNumber());
+    });
+
     it("Should not allow unauthorized user to release milestone funds and should reject double release", async () => {
       const nonce = new BN(49);
       const endTime = new BN(Math.floor(Date.now() / 1000) + 6);
